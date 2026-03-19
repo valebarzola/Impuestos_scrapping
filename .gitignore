@@ -1,0 +1,6 @@
+venv/
+cache/
+.vscode/
+.claude/
+__pycache__/
+macro_excel.vba/
