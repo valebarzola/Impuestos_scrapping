@@ -1,0 +1,42 @@
+{
+  "20/03/2026": {
+    "DOL": {
+      "tipo_comprador": 100.0
+    }
+  },
+  "21/11/2024": {
+    "DOL": {
+      "tipo_comprador": 1002.0,
+      "tipo_vendedor": 1005.0,
+      "fecha_oficial": "11/21/2024"
+    }
+  },
+  "21/11/2023": {
+    "DOL": {
+      "tipo_comprador": 354.95,
+      "tipo_vendedor": 355.95,
+      "fecha_oficial": "11/21/2023"
+    }
+  },
+  "18/11/2022": {
+    "DOL": {
+      "tipo_comprador": 162.98,
+      "tipo_vendedor": 163.18,
+      "fecha_oficial": "11/18/2022"
+    }
+  },
+  "19/11/2021": {
+    "DOL": {
+      "tipo_comprador": 100.26,
+      "tipo_vendedor": 100.46,
+      "fecha_oficial": "11/19/2021"
+    }
+  },
+  "17/11/2021": {
+    "DOL": {
+      "tipo_comprador": 100.15,
+      "tipo_vendedor": 100.35,
+      "fecha_oficial": "11/17/2021"
+    }
+  }
+}
