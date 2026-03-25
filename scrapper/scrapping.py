@@ -81,3 +81,22 @@ def obtener_cotizaciones_de_afip(fecha: str) -> Dict[str, Dict]:
 
     except requests.exceptions.RequestException as e:
         raise ConnectionError(f"Servicio de ARCA no disponible: {e}")
+
+
+def obtener_dolar_comprador(fecha: str) -> float:
+    """
+    Devuelve únicamente el tipo de cambio comprador del dólar para una fecha.
+
+    Args:
+        fecha: formato DD/MM/YYYY
+
+    Returns:
+        float con el tipo de cambio comprador del DOL
+
+    Raises:
+        LookupError: si no hay cotización del DOL para esa fecha
+    """
+    cotizaciones = obtener_cotizaciones_de_afip(fecha)
+    if "DOL" not in cotizaciones:
+        raise LookupError(f"No se encontró cotización del DOL para {fecha}")
+    return cotizaciones["DOL"]["tipo_comprador"]

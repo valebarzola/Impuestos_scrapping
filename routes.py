@@ -6,11 +6,12 @@ from fastapi import APIRouter, HTTPException, Query
 
 from config import MONEDAS_SOPORTADAS, CACHE_FILE
 from models import Cotizacion, CotizacionLote, EstadoCache
-from scrapper.scrapping import validar_formato_fecha
-from services import buscar_ultima_cotizacion_disponible, obtener_del_cache, cargar_cache
+from scrapper.scrapping import validar_formato_fecha, obtener_dolar_comprador
+from services import logica_service
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
+service = logica_service()
 
 
 @router.get("/cotizacion", response_model=Cotizacion, tags=["Cotizaciones"])
@@ -26,13 +27,13 @@ async def obtener_cotizacion(
         raise HTTPException(status_code=400, detail=f"Moneda no soportada: {moneda}. Soportadas: {', '.join(MONEDAS_SOPORTADAS.keys())}")
 
     try:
-        fecha_cotizacion, datos = buscar_ultima_cotizacion_disponible(fecha, moneda)
+        fecha_cotizacion, datos = service.buscar_ultima_cotizacion_disponible(fecha, moneda)
     except LookupError as e:
         raise HTTPException(status_code=404, detail=str(e))
     except ConnectionError as e:
         raise HTTPException(status_code=503, detail=str(e))
 
-    fuente = "cache" if obtener_del_cache(fecha_cotizacion, moneda) else "afip"
+    fuente = "cache" if service.cache.obtener_del_cache(fecha_cotizacion, moneda) else "afip"
 
     return Cotizacion(
         fecha_solicitada=fecha,
@@ -42,6 +43,23 @@ async def obtener_cotizacion(
         tipo_cambio_vendedor=datos["tipo_vendedor"],
         fuente=fuente
     )
+
+
+@router.get("/dolar/comprador", tags=["Cotizaciones"])
+async def dolar_comprador(
+    fecha: str = Query(..., description="Fecha de oficialización (DD/MM/YYYY)")
+):
+    if not validar_formato_fecha(fecha):
+        raise HTTPException(status_code=400, detail=f"Formato de fecha inválido. Use DD/MM/YYYY. Recibido: {fecha}")
+
+    try:
+        valor = obtener_dolar_comprador(fecha)
+    except LookupError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except ConnectionError as e:
+        raise HTTPException(status_code=503, detail=str(e))
+
+    return {"tipo_cambio_comprador": valor}
 
 
 @router.post("/cotizacion/lote", response_model=List[Cotizacion], tags=["Cotizaciones"])
@@ -72,7 +90,7 @@ async def obtener_cotizacion_lote(
 
 @router.get("/cache/estado", response_model=EstadoCache, tags=["Administración"])
 async def estado_cache() -> EstadoCache:
-    cache = cargar_cache()
+    cache = service.cache.cargar_cache()
     fechas = set(cache.keys())
     monedas = set(m for v in cache.values() for m in v.keys())
 
